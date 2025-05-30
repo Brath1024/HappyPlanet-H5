@@ -60,9 +60,13 @@ HappyPlanet/
 ## 🚀 使用方法
 
 ### 运行游戏
-1. 打开 `prototype_enhanced.html` 文件
-2. 确保 `sounds.js`、`animations.css` 和数据文件在同一目录
-3. 在浏览器中享受增强版游戏体验
+1. ```js
+   npx http-server .
+   ```
+
+2. 打开 `prototype.html` 文件
+
+3. 确保 `sounds.js`、`animations.css` 和数据文件在同一目录
 
 ### 音效控制
 - 点击右上角的音效按钮可以开关音效
