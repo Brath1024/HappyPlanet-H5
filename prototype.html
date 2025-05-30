@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=375, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>快乐球球 - 增强版原型</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="animations.css">
+    <style>
+      body { background: #ffa93b; }
+      .main-bg { background: #ffa93b; }
+      .top-bar {
+        background: #fff;
+        border-radius: 28px;
+        border: 4px solid #222;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+      }
+      .progress-bg { background: #2d1c2c; border-radius: 8px; }
+      .progress-fg { background: linear-gradient(90deg, #eaff6b 60%, #b2a0c7 100%); border-radius: 8px; transition: width 0.3s; }
+      .top-btn { background: #fff; border-radius: 50%; border: 2px solid #222; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+      .game-ball {
+        background: #fff;
+        border-radius: 50%;
+        border: 4px solid #ffb6c1;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+        width: 64px;
+        height: 64px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        transition: transform 0.15s cubic-bezier(.4,2,.6,1), box-shadow 0.15s, opacity 0.3s;
+      }
+      .game-ball.hit {
+        transform: scale(1.15);
+        box-shadow: 0 0 16px 4px #ffe066;
+      }
+      .game-ball.vanish {
+        animation: vanish-ball 0.4s forwards;
+      }
+      @keyframes vanish-ball {
+        0% { opacity: 1; transform: scale(1); }
+        80% { opacity: 0.7; transform: scale(1.2); }
+        100% { opacity: 0; transform: scale(0.1); }
+      }
+      .game-ball-label { font-family: 'Arial Black', 'Arial', sans-serif; font-size: 18px; color: #c0397e; font-weight: bold; }
+      .bottom-bar {
+        background: #fff;
+        border-radius: 28px 28px 0 0;
+        border: 4px solid #222;
+        box-shadow: 0 -2px 12px 0 rgba(0,0,0,0.10);
+      }
+      .tab-btn {
+        background: #ffe066;
+        color: #222;
+        border-radius: 16px;
+        font-weight: bold;
+        font-size: 18px;
+        border: 2px solid #222;
+        margin-right: 8px;
+        padding: 0.3rem 1.1rem;
+      }
+      .tab-btn.selected {
+        background: #fff;
+        color: #222;
+        border-bottom: 4px solid #222;
+      }
+      .tab-btn:last-child { margin-right: 0; }
+      .collect-btn {
+        background: #ffe066;
+        color: #222;
+        border-radius: 16px;
+        font-weight: bold;
+        font-size: 20px;
+        border: 2px solid #222;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+        padding: 0.2rem 1.1rem;
+        display: flex;
+        align-items: center;
+        min-width: 120px;
+        justify-content: center;
+      }
+      .collect-btn[disabled] {
+        background: #e5e7eb;
+        color: #aaa;
+        cursor: not-allowed;
+      }
+      .upgrade-card {
+        background: #3b2e4a;
+        color: #fff;
+        border-radius: 18px;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+        border: 3px solid #fff;
+        min-width: 120px;
+        margin-right: 12px;
+        padding: 0.7rem 0.7rem 0.5rem 0.7rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .upgrade-card:last-child { margin-right: 0; }
+      .upgrade-btn {
+        background: #ffe066;
+        color: #222;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 16px;
+        border: 2px solid #222;
+        margin-top: 0.3rem;
+        padding: 0.2rem 1.1rem;
+        display: flex;
+        align-items: center;
+      }
+      .upgrade-btn:active {
+        background: #fffbe6;
+      }
+      .open-btn {
+        background: #fff;
+        color: #222;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 16px;
+        border: 2px solid #ffe066;
+        margin-top: 0.3rem;
+        padding: 0.2rem 1.1rem;
+        display: flex;
+        align-items: center;
+      }
+      .npc-hp-bar {
+        width: 80%;
+        height: 8px;
+        background: #eee;
+        border-radius: 6px;
+        margin-top: 2px;
+        position: relative;
+      }
+      .npc-hp-bar-inner {
+        height: 8px;
+        background: #ff6b81;
+        border-radius: 6px;
+        position: absolute;
+        left: 0; top: 0;
+        transition: width 0.2s;
+      }
+      .auto-ball {
+        background: #fffbe6;
+        border: 3px solid #ffe066;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: bold;
+        color: #3b2e4a;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+        z-index: 2;
+        transition: transform 0.2s;
+        overflow: hidden;
+      }
+      .auto-ball img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+      .auto-ball.vanish {
+        animation: vanish-ball 0.4s forwards;
+      }
+      .leaf-amount {
+        font-weight: bold;
+        color: #388e3c;
+        font-size: 20px;
+        margin-left: 4px;
+      }
+      .sound-toggle {
+        position: fixed;
+        top: 60px;
+        right: 10px;
+        z-index: 1000;
+        background: #fff;
+        border: 2px solid #222;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+      }
+    </style>
+  </head>
+  <body class="main-bg flex flex-col items-center min-h-screen w-full">
+    <!-- 音效开关 -->
+    <div class="sound-toggle btn-animate btn-ripple" id="sound-toggle">
+      <i class="fas fa-volume-up" id="sound-icon"></i>
+    </div>
+
+    <!-- 顶部栏 -->
+    <div class="top-bar w-full max-w-[375px] mt-2 mb-1 px-3 py-2 flex flex-col items-center relative z-10 fade-in">
+      <div class="flex justify-between items-center w-full mb-1">
+        <div class="flex items-center text-xl font-bold text-black">
+          <i class="fas fa-question-circle mr-2 text-gray-400"></i>
+          <span id="level-label">第1关</span>
+        </div>
+        <div class="flex items-center font-bold text-lg">
+          <i class="fas fa-leaf mr-1 text-green-600"></i><span id="leaf-amount">99999999</span>
+        </div>
+        <div class="top-btn ml-2 btn-animate btn-ripple" id="pause-btn" style="cursor:pointer;"><i class="fas fa-pause"></i></div>
+      </div>
+      <div class="w-full flex items-center mt-1">
+        <div class="flex-1 h-4 progress-bg relative">
+          <div class="h-4 progress-fg absolute top-0 left-0" id="progress-bar" style="width: 100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主游戏区 -->
+    <div class="w-full max-w-[375px] relative" id="battlefield" style="height: 420px;"></div>
+
+    <!-- 底部操作栏 -->
+    <div class="bottom-bar w-full max-w-[375px] fixed left-0 right-0 mx-auto pb-2 pt-1 z-20 border-4 border-black box-border slide-in-up" style="bottom:0;">
+      <div class="flex items-center w-full px-3 mb-1">
+        <div class="flex-1"></div>
+        <button class="collect-btn btn-animate btn-ripple" id="collect-btn"><i class="fas fa-leaf mr-1 text-green-600"></i><span id="collect-text">领取570F</span><span id="collect-cd" class="ml-2 text-xs text-gray-500"></span></button>
+      </div>
+      <div class="flex w-full justify-between items-center px-2 py-1 mb-1">
+        <button class="tab-btn selected btn-animate btn-ripple" id="tab-ball">球球</button>
+        <button class="tab-btn btn-animate btn-ripple" id="tab-skill">技能</button>
+        <button class="tab-btn btn-animate btn-ripple" id="tab-magic">魔法</button>
+        <button class="tab-btn btn-animate btn-ripple" id="tab-shop">商店</button>
+        <button class="tab-btn btn-animate btn-ripple" id="tab-friend">好友</button>
+      </div>
+      <!-- 球球列表 -->
+      <div class="w-full flex overflow-x-auto px-2 mt-1 pb-1" id="ball-list"></div>
+      <!-- 技能列表 -->
+      <div class="w-full flex overflow-x-auto px-2 mt-1 pb-1 hidden" id="skill-list"></div>
+      <!-- 魔法列表 -->
+      <div class="w-full flex overflow-x-auto px-2 mt-1 pb-1 hidden" id="magic-list"></div>
+    </div>
+
+    <!-- 待开发模态框 -->
+    <div id="modal-dev" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl shadow-lg p-6 w-80 max-w-full flex flex-col items-center border-4 border-black zoom-in">
+        <div class="font-bold text-lg mb-2">功能开发中</div>
+        <div class="text-gray-600 mb-4">该功能正在开发，敬请期待！</div>
+        <button class="mt-2 px-4 py-2 bg-yellow-400 text-black rounded font-bold border-2 border-black btn-animate btn-ripple" onclick="closeModal('modal-dev')">关闭</button>
+      </div>
+    </div>
+
+    <!-- 暂停遮罩 -->
+    <div id="pause-mask" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <button id="resume-btn" class="px-8 py-4 bg-yellow-400 text-black rounded-2xl font-bold text-2xl border-4 border-black shadow-lg btn-animate btn-ripple">继续游戏</button>
+    </div>
+
+    <!-- 提示模态框 -->
+    <div id="modal-tip" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl shadow-lg p-6 w-80 max-w-full flex flex-col items-center border-4 border-black zoom-in">
+        <div class="font-bold text-lg mb-2" id="tip-title">提示</div>
+        <div class="text-gray-600 mb-4 text-center" id="tip-content"></div>
+        <button class="mt-2 px-4 py-2 bg-yellow-400 text-black rounded font-bold border-2 border-black btn-animate btn-ripple" onclick="closeModal('modal-tip')">确定</button>
+      </div>
+    </div>
+
+    <!-- 技能弹窗 -->
+    <div id="modal-skill" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl shadow-lg p-6 w-80 max-w-full flex flex-col items-center border-4 border-black zoom-in">
+        <div class="font-bold text-lg mb-2">技能列表</div>
+        <div id="skill-list-modal" class="w-full flex flex-col space-y-2 mb-2"></div>
+        <button class="mt-2 px-4 py-2 bg-yellow-400 text-black rounded font-bold border-2 border-black btn-animate btn-ripple" onclick="closeModal('modal-skill')">关闭</button>
+      </div>
+    </div>
+
+    <!-- 魔法弹窗 -->
+    <div id="modal-magic" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl shadow-lg p-6 w-80 max-w-full flex flex-col items-center border-4 border-black zoom-in">
+        <div class="font-bold text-lg mb-2">魔法列表</div>
+        <div id="magic-list-modal" class="w-full flex flex-col space-y-2 mb-2"></div>
+        <button class="mt-2 px-4 py-2 bg-yellow-400 text-black rounded font-bold border-2 border-black btn-animate btn-ripple" onclick="closeModal('modal-magic')">关闭</button>
+      </div>
+    </div>
+
+    <footer class="w-full max-w-[375px] text-center text-xs text-gray-400 mt-4 mb-24">© 2024 快乐球球 增强版原型</footer>
+    
+    <script src="sounds.js"></script>
+    <script>
+      // 全局变量
+      let balls = [];
+      let level = 1;
+      let npcBalls = [];
+      let npcTotalHp = 0;
+      let npcRemainHp = 0;
+      let leaf = 99999;
+      let cooldown = 0;
+      let paused = false;
+      let skills = [];
+      let magics = [];
+      let skillCooldowns = {};
+      let magicCooldowns = {};
+      let activeSkillEffects = {};
+      let skillTimers = {};
+
+      // 工具函数
+      function closeModal(modalId) {
+        if (window.soundManager) soundManager.playButtonClick();
+        document.getElementById(modalId).classList.add('hidden');
+      }
+
+      function showFloatingText(x, y, text, color = '#4ecdc4') {
+        const floatingText = document.createElement('div');
+        floatingText.className = 'floating-text';
+        floatingText.textContent = text;
+        floatingText.style.position = 'absolute';
+        floatingText.style.left = x + 'px';
+        floatingText.style.top = y + 'px';
+        floatingText.style.color = color;
+        floatingText.style.fontWeight = 'bold';
+        floatingText.style.fontSize = '14px';
+        floatingText.style.pointerEvents = 'none';
+        floatingText.style.zIndex = '1000';
+        floatingText.style.animation = 'floating-text 1.5s ease-out forwards';
+        document.body.appendChild(floatingText);
+        setTimeout(() => floatingText.remove(), 1500);
+      }
+
+      // 音效开关
+      document.getElementById('sound-toggle').onclick = function() {
+        if (!window.soundManager) return;
+        const enabled = soundManager.toggle();
+        const icon = document.getElementById('sound-icon');
+        icon.className = enabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+        this.classList.add('bounce');
+        setTimeout(() => this.classList.remove('bounce'), 1000);
+      };
+
+      // 动态加载balls.json
+      fetch('balls.json').then(r=>r.json()).then(data=>{
+        balls = data.map((b,i)=>Object.assign({},b,{unlocked:i===0,level:i===0?20:0}));
+        init();
+      }).catch(err => { 
+        console.error('Failed to load balls.json:', err);
+        showTip('加载错误', '球球数据加载失败，请检查文件是否存在');
+      });
+
+      function setPaused(state) {
+        paused = state;
+        document.getElementById('pause-btn').innerHTML = paused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+      }
+
+      // 生成NPC小球
+      function spawnNPCs() {
+        const bf = document.getElementById('battlefield'); 
+        bf.querySelectorAll('.game-ball').forEach(el => el.remove());
+        npcBalls = [];
+        let n = 5 + Math.floor(level/2);
+        npcTotalHp = 0;
+        for(let i=0;i<n;i++){
+          let hp = 40+level*20+Math.floor(Math.random()*40);
+          npcTotalHp += hp;
+          let left = Math.random()*260+20, top = Math.random()*260+20;
+          let el = document.createElement('div');
+          el.className = 'game-ball ball-spawn';
+          el.style.left = left+'px';
+          el.style.top = top+'px';
+          el.innerHTML = `<span class='game-ball-label'>${(hp/100).toFixed(2)}G</span><div class='npc-hp-bar'><div class='npc-hp-bar-inner' style='width:100%'></div></div>`;
+          el.dataset.hp = hp;
+          el.dataset.maxhp = hp;
+          el.onclick = function() {
+            if(el.classList.contains('ball-death')) return;
+            if (window.soundManager) soundManager.playBallClick();
+            let curHp = parseInt(el.dataset.hp);
+            if(curHp<=0) {
+              el.classList.add('ball-death');
+              if (window.soundManager) soundManager.playBallDeath();
+              setTimeout(()=>el.remove(), 800);
+              return;
+            }
+            el.classList.add('ball-collision');
+            setTimeout(()=>el.classList.remove('ball-collision'), 300);
+            let dmg = balls[0].baseDamage + (balls[0].level-1)*2;
+            curHp = Math.max(0, curHp-dmg);
+            el.dataset.hp = curHp;
+            let percent = Math.round(curHp/parseInt(el.dataset.maxhp)*100);
+            el.querySelector('.npc-hp-bar-inner').style.width = percent+'%';
+            el.querySelector('.game-ball-label').textContent = (curHp/100).toFixed(2)+'G';
+            
+            // 显示伤害数字
+            showFloatingText(left + 32, top, `-${dmg}`, '#ff6b6b');
+            
+            updateNpcHp();
+            if(curHp<=0) {
+              setTimeout(()=>{
+                el.classList.add('ball-death');
+                if (window.soundManager) soundManager.playBallDeath();
+                setTimeout(()=>el.remove(), 800);
+                updateNpcHp();
+                checkNextLevel();
+              }, 300);
+            }
+          };
+          bf.appendChild(el);
+          npcBalls.push(el);
+        }
+        updateNpcHp();
+      }
+
+      function updateNpcHp() {
+        npcRemainHp = npcBalls.reduce((sum,el)=>sum+Math.max(0,parseInt(el.dataset.hp||0)),0);
+        let bar = document.getElementById('progress-bar');
+        let percent = npcTotalHp?Math.max(0,Math.round(npcRemainHp/npcTotalHp*100)):0;
+        bar.style.width = percent+'%';
+      }
+
+      function checkNextLevel() {
+        setTimeout(()=>{
+          // 检查所有NPC球球是否已死亡（HP为0或标记为ball-death）或已从DOM移除
+          const allNpcsDead = npcBalls.every(el => {
+            return !document.body.contains(el) || 
+                   el.classList.contains('ball-death') || 
+                   parseInt(el.dataset.hp || 0) <= 0;
+          });
+          
+          if(allNpcsDead) {
+            level++;
+            document.getElementById('level-label').textContent = `第${level}关`;
+            document.getElementById('level-label').classList.add('level-complete');
+            setTimeout(() => document.getElementById('level-label').classList.remove('level-complete'), 1500);
+            if (window.soundManager) soundManager.playLevelComplete();
+            spawnNPCs();
+          }
+        }, 500);
+      }
+
+      // 球球卡片渲染
+      function renderBallList() {
+        const list = document.getElementById('ball-list');
+        list.innerHTML = '';
+        balls.forEach((ball,i)=>{
+          let card = document.createElement('div');
+          card.className = 'upgrade-card fade-in';
+          card.setAttribute('data-ball-id',ball.id);
+          card.setAttribute('data-unlocked',ball.unlocked);
+          card.innerHTML = `
+            <img src="${ball.img}" class="w-12 h-12 rounded-full mb-1 border-2 border-white" alt="${ball.name}" />
+            <div class="font-bold text-base mt-1">${ball.name}</div>
+            <div class="text-xs text-gray-300">Lv.${ball.level||0}</div>
+            <div class="flex items-center mt-1"><span class="text-yellow-300 font-bold text-base">+${ball.baseDamage+((ball.level||0)-1)*2}</span></div>
+          `;
+          if(i===0||ball.unlocked) {
+            let upBtn = document.createElement('button');
+            upBtn.className = 'upgrade-btn mt-1 btn-animate btn-ripple';
+            let upCost = Math.floor(ball.upgradeBase*Math.pow(ball.upgradeRatio,ball.level||1));
+            upBtn.innerHTML = `<i class="fas fa-leaf mr-1 text-green-600"></i>升级(${upCost})`;
+            upBtn.onclick = function() {
+              if (window.soundManager) soundManager.playButtonClick();
+              if(!checkLeafEnough(upCost)) return;
+              leaf -= upCost; 
+              
+              // 升级奖励：根据关卡给予叶子
+              let levelBonus = level * 10;
+              leaf += levelBonus;
+              showFloatingText(card.offsetLeft + 60, card.offsetTop, `+${levelBonus}叶`, '#4ecdc4');
+              
+              updateLeaf();
+              ball.level = (ball.level||1)+1;
+              card.querySelector('.text-xs').textContent = 'Lv.'+ball.level;
+              card.querySelector('.text-yellow-300').textContent = '+'+(ball.baseDamage+(ball.level-1)*2);
+              upBtn.innerHTML = `<i class="fas fa-leaf mr-1 text-green-600"></i>升级(${Math.floor(ball.upgradeBase*Math.pow(ball.upgradeRatio,ball.level))})`;
+              card.classList.add('upgrade-success');
+              if (window.soundManager) soundManager.playUpgradeSuccess();
+              setTimeout(()=>card.classList.remove('upgrade-success'), 800);
+              document.querySelectorAll('.auto-ball[data-ball-id="'+ball.id+'"]').forEach(auto=>{
+                auto.dataset.level = ball.level;
+                auto.dataset.damage = ball.baseDamage+(ball.level-1)*2;
+              });
+            };
+            card.appendChild(upBtn);
+          } else {
+            let openBtn = document.createElement('button');
+            openBtn.className = 'open-btn mt-1 btn-animate btn-ripple';
+            openBtn.innerHTML = `<i class="fas fa-leaf mr-1 text-green-600"></i>开启(${ball.unlockCost})`;
+            openBtn.onclick = function() {
+              if (window.soundManager) soundManager.playButtonClick();
+              if(!checkLeafEnough(ball.unlockCost)) return;
+              leaf -= ball.unlockCost; updateLeaf();
+              ball.unlocked = true; ball.level = 1;
+              card.classList.add('unlock-animation');
+              if (window.soundManager) soundManager.playUnlock();
+              setTimeout(() => {
+                renderBallList();
+                spawnAutoBall(ball);
+              }, 1000);
+            };
+            card.appendChild(openBtn);
+          }
+          list.appendChild(card);
+        });
+      }
+
+      function updateLeaf() {
+        document.getElementById('leaf-amount').textContent = leaf > 99999999 ? '∞' : leaf;
+      }
+
+      // 自动球球乱动，方向只在碰撞墙壁时改变
+      function spawnAutoBall(ball) {
+        const bf = document.getElementById('battlefield');
+        let auto = document.createElement('div');
+        auto.className = 'auto-ball ball-spawn ball-trail';
+        auto.setAttribute('data-ball-id', ball.id);
+        auto.setAttribute('data-level', ball.level);
+        auto.setAttribute('data-damage', ball.baseDamage+(ball.level-1)*2);
+        
+        // 智能出生点：底部中央优先，若有NPC重叠则左右偏移尝试
+        let rect = bf.getBoundingClientRect();
+        let curSize = 44;
+        let tryX = (rect.width-curSize)/2, y = rect.height-60;
+        let found = false;
+        for(let offset=0; offset<=rect.width/2; offset+=20) {
+          for(let sign of [1,-1]) {
+            let x = tryX + sign*offset;
+            let overlap = false;
+            document.querySelectorAll('.game-ball').forEach(npc=>{
+              let nx = parseFloat(npc.style.left)+32, ny = parseFloat(npc.style.top)+32;
+              let ax = x+curSize/2, ay = y+curSize/2;
+              let dist = Math.sqrt((nx-ax)**2+(ny-ay)**2);
+              if(dist<(curSize/2+32)) overlap = true;
+            });
+            if(!overlap && x>=0 && x<=rect.width-curSize) {
+              auto.style.left = x+'px';
+              auto.style.top = y+'px';
+              found = true;
+              break;
+            }
+          }
+          if(found) break;
+        }
+        if(!found) { // 实在找不到就随机底部安全区
+          let x = Math.random()*(rect.width-curSize);
+          auto.style.left = x+'px';
+          auto.style.top = y+'px';
+        }
+        
+        // 使用实际图片而不是emoji
+        auto.innerHTML = `<img src="${ball.img}" alt="${ball.name}" />`;
+        bf.appendChild(auto);
+        if (window.soundManager) soundManager.playBallSpawn();
+        
+        // 速度支持json配置
+        let baseSpeed = (ball.speed || 2.5) * (1 + (ball.level-1)*0.05); // 默认更快
+        let speed = baseSpeed;
+        let angle = Math.random()*2*Math.PI;
+        let dx = Math.cos(angle)*speed, dy = Math.sin(angle)*speed;
+        let lastNpcHit = 0;
+        
+        function getSkillSpeedMultiplier() {
+          let mul = 1;
+          Object.values(activeSkillEffects).forEach(eff=>{ if(eff.speedMultiplier) mul *= eff.speedMultiplier; });
+          return mul;
+        }
+        function getSkillDamageMultiplier() {
+          let mul = 1;
+          Object.values(activeSkillEffects).forEach(eff=>{ if(eff.damageMultiplier) mul *= eff.damageMultiplier; });
+          return mul;
+        }
+        function getSkillSizeMultiplier() {
+          let mul = 1;
+          Object.values(activeSkillEffects).forEach(eff=>{ if(eff.sizeMultiplier) mul *= eff.sizeMultiplier; });
+          return mul;
+        }
+        
+        function move() {
+          if(paused) { requestAnimationFrame(move); return; }
+          let rect = bf.getBoundingClientRect();
+          let x = parseFloat(auto.style.left), y = parseFloat(auto.style.top);
+          let skillSpeed = getSkillSpeedMultiplier();
+          let skillSize = getSkillSizeMultiplier();
+          // 使用当前速度或基础速度
+          let curSpeed = parseFloat(auto.dataset.currentSpeed || baseSpeed) * skillSpeed;
+          let curSize = 44 * skillSize;
+          auto.style.width = auto.style.height = curSize+'px';
+          x += (44-curSize)/2; y += (44-curSize)/2;
+          x += dx * skillSpeed; y += dy * skillSpeed;
+          let bounced = false;
+          if(x<0||x>rect.width-curSize) { dx*=-1; bounced=true; }
+          if(y<0||y>rect.height-curSize) { dy*=-1; bounced=true; }
+          if(bounced) {
+            let angle = Math.atan2(dy, dx) + (Math.random()-0.5)*0.3;
+            let spd = Math.sqrt(dx*dx+dy*dy);
+            dx = Math.cos(angle)*spd;
+            dy = Math.sin(angle)*spd;
+          }
+          x = Math.max(0, Math.min(rect.width-curSize, x));
+          y = Math.max(0, Math.min(rect.height-curSize, y));
+          auto.style.left = x+'px';
+          auto.style.top = y+'px';
+          let now = Date.now();
+          let hit = false;
+          document.querySelectorAll('.game-ball').forEach(npc=>{
+            let nx = parseFloat(npc.style.left)+32, ny = parseFloat(npc.style.top)+32;
+            let ax = x+curSize/2, ay = y+curSize/2;
+            let dist = Math.sqrt((nx-ax)**2+(ny-ay)**2);
+            if(dist<(curSize/2+32) && !npc.classList.contains('ball-death')) {
+              if(now-lastNpcHit>150) {
+                if (window.soundManager) soundManager.playCollision();
+                let hpBar = npc.querySelector('.npc-hp-bar-inner');
+                let curHp = parseInt(npc.dataset.hp);
+                let dmg = (parseInt(auto.dataset.damage)||ball.baseDamage) * getSkillDamageMultiplier();
+                curHp = Math.max(0, curHp-Math.floor(dmg/2));
+                npc.dataset.hp = curHp;
+                let percent = Math.round(curHp/parseInt(npc.dataset.maxhp)*100);
+                hpBar.style.width = percent+'%';
+                npc.querySelector('.game-ball-label').textContent = (curHp/100).toFixed(2)+'G';
+                
+                // 显示伤害数字
+                showFloatingText(nx, ny - 20, `-${Math.floor(dmg/2)}`, '#ff6b6b');
+                
+                updateNpcHp();
+                if(curHp<=0) {
+                  npc.classList.add('ball-death');
+                  if (window.soundManager) soundManager.playBallDeath();
+                  setTimeout(()=>npc.remove(), 800);
+                  updateNpcHp();
+                  checkNextLevel();
+                }
+                dx = -dx; dy = -dy;
+                let angle = Math.atan2(dy, dx) + (Math.random()-0.5)*0.3;
+                let spd = Math.sqrt(dx*dx+dy*dy);
+                dx = Math.cos(angle)*spd;
+                dy = Math.sin(angle)*spd;
+                lastNpcHit = now;
+              }
+              hit = true;
+            }
+          });
+          if(document.body.contains(auto)) requestAnimationFrame(move);
+        }
+        move();
+      }
+
+      // 领取按钮冷却演示（30分钟）
+      let collectBtn = document.getElementById('collect-btn');
+      let collectText = document.getElementById('collect-text');
+      let collectCd = document.getElementById('collect-cd');
+      function updateCollectBtn() {
+        if (cooldown > 0) {
+          collectBtn.setAttribute('disabled','disabled');
+          let min = Math.floor(cooldown/60), sec = cooldown%60;
+          collectCd.textContent = `(${min}:${sec.toString().padStart(2,'0')})`;
+        } else {
+          collectBtn.removeAttribute('disabled');
+          collectCd.textContent = '';
+        }
+      }
+      collectBtn.onclick = function() {
+        if (cooldown === 0) {
+          if (window.soundManager) soundManager.playCollectReward();
+          let add = 570;
+          leaf = Math.min(leaf + add, 99999999);
+          updateLeaf();
+          collectText.textContent = '领取成功!';
+          this.classList.add('collect-reward');
+          cooldown = 30*60;
+          updateCollectBtn();
+          setTimeout(()=>{
+            collectText.textContent='领取570F';
+            this.classList.remove('collect-reward');
+          }, 1200);
+        }
+      }
+
+      // 技能和魔法系统
+      function applySkillEffect(skill) {
+        const autoBalls = Array.from(document.querySelectorAll('.auto-ball'));
+        if (autoBalls.length === 0) {
+          showTip('无法释放', '请先解锁并生成至少一个球球');
+          return; 
+        }
+
+        // 添加效果到活动效果列表
+        activeSkillEffects[skill.id] = { 
+          ...skill.effect, 
+          end: Date.now() + skill.duration * 1000,
+          name: skill.name,
+          icon: skill.icon
+        };
+
+        // 显示效果激活提示
+        showTip('效果激活', `${skill.name}已激活，持续${skill.duration}秒`);
+
+        // 清除之前的计时器
+        if (skillTimers[skill.id]) clearTimeout(skillTimers[skill.id]);
+
+        // 设置效果结束计时器
+        skillTimers[skill.id] = setTimeout(() => {
+          delete activeSkillEffects[skill.id];
+          showTip('效果结束', `${skill.name}效果已结束`);
+        }, skill.duration * 1000);
+
+        // 判断是技能还是魔法
+        const isMagic = magics.some(m => m.id === skill.id);
+        
+        if (isMagic) {
+          // 魔法效果：随机选择一个球球
+          const randomBall = autoBalls[Math.floor(Math.random() * autoBalls.length)];
+          
+          // 应用魔法效果到选中的球球
+          if (skill.effect.speedMultiplier) {
+            let baseSpeed = parseFloat(randomBall.dataset.baseSpeed || randomBall.dataset.speed || 2.5);
+            randomBall.dataset.currentSpeed = baseSpeed * skill.effect.speedMultiplier;
+          }
+          
+          if (skill.effect.damageMultiplier) {
+            let baseDamage = parseInt(randomBall.dataset.damage);
+            randomBall.dataset.currentDamage = baseDamage * skill.effect.damageMultiplier;
+          }
+
+          if (skill.effect.sizeMultiplier) {
+            let baseSize = 44;
+            randomBall.style.width = randomBall.style.height = (baseSize * skill.effect.sizeMultiplier) + 'px';
+          }
+
+          // 添加魔法效果标记
+          randomBall.dataset.activeMagic = skill.id;
+          
+          // 设置魔法效果结束时的恢复
+          setTimeout(() => {
+            if (randomBall.dataset.activeMagic === skill.id) {
+              // 恢复原始大小
+              if (skill.effect.sizeMultiplier) {
+                randomBall.style.width = randomBall.style.height = '44px';
+              }
+              // 恢复原始速度
+              if (skill.effect.speedMultiplier) {
+                randomBall.dataset.currentSpeed = randomBall.dataset.baseSpeed || randomBall.dataset.speed || 2.5;
+              }
+              // 恢复原始伤害
+              if (skill.effect.damageMultiplier) {
+                randomBall.dataset.currentDamage = randomBall.dataset.damage;
+              }
+              // 移除魔法效果标记
+              delete randomBall.dataset.activeMagic;
+            }
+          }, skill.duration * 1000);
+
+        } else {
+          // 技能效果：应用到所有球球
+          autoBalls.forEach(auto => {
+            if (skill.effect.speedMultiplier) {
+              let baseSpeed = parseFloat(auto.dataset.baseSpeed || auto.dataset.speed || 2.5);
+              auto.dataset.currentSpeed = baseSpeed * skill.effect.speedMultiplier;
+            }
+            
+            if (skill.effect.damageMultiplier) {
+              let baseDamage = parseInt(auto.dataset.damage);
+              auto.dataset.currentDamage = baseDamage * skill.effect.damageMultiplier;
+            }
+
+            if (skill.effect.sizeMultiplier) {
+              let baseSize = 44;
+              auto.style.width = auto.style.height = (baseSize * skill.effect.sizeMultiplier) + 'px';
+            }
+          });
+        }
+      }
+
+      // 加载技能和魔法数据
+      async function loadGameData() {
+        try {
+          const [skillsResponse, magicsResponse] = await Promise.all([
+            fetch('skills.json'),
+            fetch('magics.json')
+          ]);
+
+          if (skillsResponse.ok && magicsResponse.ok) {
+            const [skillsData, magicsData] = await Promise.all([
+              skillsResponse.json(),
+              magicsResponse.json()
+            ]);
+
+            skills = skillsData;
+            magics = magicsData;
+            renderSkillList();
+            renderMagicList();
+            // 初始化时显示球球列表
+            switchTab('tab-ball');
+          } else {
+            console.warn('Skills or magics data not available, using fallback');
+            // 如果文件不存在，使用空数组，不显示错误
+            skills = [];
+            magics = [];
+            switchTab('tab-ball');
+          }
+        } catch (error) {
+          console.warn('Skills and magics data not available:', error);
+          // 静默处理，不显示错误提示
+          skills = [];
+          magics = [];
+          switchTab('tab-ball');
+        }
+      }
+
+      // 渲染技能列表
+      function renderSkillList() {
+        const list = document.getElementById('skill-list');
+        list.innerHTML = '';
+        if (!skills || skills.length === 0) {
+          list.innerHTML = '<div class="text-center text-gray-500 py-4">暂无技能数据</div>';
+          return;
+        }
+        skills.forEach(skill => {
+          let card = document.createElement('div');
+          card.className = 'upgrade-card bg-green-50 border-green-200 flex flex-col justify-between fade-in';
+          card.innerHTML = `
+            <div class="flex flex-col items-center">
+              <i class='fas ${skill.icon} text-2xl text-green-600 mb-1'></i>
+              <div class='font-bold text-base'>${skill.name}</div>
+              <div class='text-xs text-gray-500 text-center'>${skill.desc}</div>
+            </div>
+            <div class="flex flex-col items-center mt-2">
+              <button class='skill-btn w-full px-2 py-1 bg-green-200 text-green-800 rounded-lg text-sm font-bold border-2 border-green-300 flex items-center justify-center btn-animate btn-ripple' data-skill-id='${skill.id}'>
+                <span class="truncate">消耗(${skill.cost})</span>
+                <i class="fas fa-leaf ml-1 text-green-600"></i>
+              </button>
+              <span class='text-xs text-gray-400 mt-1' id='skill-cd-${skill.id}'></span>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+        
+        // 绑定技能释放按钮
+        document.querySelectorAll('.skill-btn').forEach(btn => {
+          btn.onclick = function() {
+            if (window.soundManager) soundManager.playButtonClick();
+            let id = btn.getAttribute('data-skill-id');
+            let skill = skills.find(s=>s.id==id);
+            if(skillCooldowns[id]>0) return;
+            if(!checkLeafEnough(skill.cost)) return;
+            leaf -= skill.cost; updateLeaf();
+            skillCooldowns[id] = skill.cooldown;
+            updateSkillCooldowns();
+            btn.textContent = '释放成功!';
+            btn.parentElement.parentElement.classList.add('skill-activate');
+            setTimeout(()=>{
+              btn.innerHTML = `<span class="truncate">消耗(${skill.cost})</span><i class="fas fa-leaf ml-1 text-green-600"></i>`;
+              btn.parentElement.parentElement.classList.remove('skill-activate');
+            }, 1000);
+            applySkillEffect(skill);
+          }
+        });
+      }
+
+      // 渲染魔法列表
+      function renderMagicList() {
+        const list = document.getElementById('magic-list');
+        list.innerHTML = '';
+        if (!magics || magics.length === 0) {
+          list.innerHTML = '<div class="text-center text-gray-500 py-4">暂无魔法数据</div>';
+          return;
+        }
+        magics.forEach(magic => {
+          let card = document.createElement('div');
+          card.className = 'upgrade-card bg-purple-50 border-purple-200 flex flex-col justify-between fade-in';
+          card.innerHTML = `
+            <div class="flex flex-col items-center">
+              <i class='fas ${magic.icon} text-2xl text-purple-600 mb-1'></i>
+              <div class='font-bold text-base'>${magic.name}</div>
+              <div class='text-xs text-gray-500 text-center'>${magic.desc}</div>
+            </div>
+            <div class="flex flex-col items-center mt-2">
+              <button class='magic-btn w-full px-2 py-1 bg-purple-200 text-purple-800 rounded-lg text-sm font-bold border-2 border-purple-300 flex items-center justify-center btn-animate btn-ripple' data-magic-id='${magic.id}'>
+                <span class="truncate">消耗(${magic.cost})</span>
+                <i class="fas fa-leaf ml-1 text-green-600"></i>
+              </button>
+              <span class='text-xs text-gray-400 mt-1' id='magic-cd-${magic.id}'></span>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+        
+        // 绑定魔法释放按钮
+        document.querySelectorAll('.magic-btn').forEach(btn => {
+          btn.onclick = function() {
+            if (window.soundManager) soundManager.playButtonClick();
+            let id = btn.getAttribute('data-magic-id');
+            let magic = magics.find(m=>m.id==id);
+            if(magicCooldowns[id]>0) return; 
+            if(!checkLeafEnough(magic.cost)) return;
+            leaf -= magic.cost; updateLeaf();
+            magicCooldowns[id] = magic.cooldown;
+            updateMagicCooldowns();
+            btn.textContent = '开启成功!';
+            btn.parentElement.parentElement.classList.add('skill-activate');
+            setTimeout(()=>{
+              btn.innerHTML = `<span class="truncate">消耗(${magic.cost})</span><i class="fas fa-leaf ml-1 text-green-600"></i>`;
+              btn.parentElement.parentElement.classList.remove('skill-activate');
+            }, 1000);
+            applySkillEffect(magic);
+          }
+        });
+      }
+
+      // Tab切换逻辑
+      function switchTab(tabId) {
+        if (window.soundManager) soundManager.playButtonClick();
+        // 更新按钮状态
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.toggle('selected', btn.id === tabId);
+        });
+        // 显示对应列表
+        document.getElementById('ball-list').classList.toggle('hidden', tabId !== 'tab-ball');
+        document.getElementById('skill-list').classList.toggle('hidden', tabId !== 'tab-skill');
+        document.getElementById('magic-list').classList.toggle('hidden', tabId !== 'tab-magic');
+      }
+
+      // 显示提示模态框
+      function showTip(title, content) {
+        if (window.soundManager) soundManager.playButtonClick();
+        document.getElementById('tip-title').textContent = title;
+        document.getElementById('tip-content').textContent = content;
+        document.getElementById('modal-tip').classList.remove('hidden');
+      }
+
+      // 检查叶子是否足够
+      function checkLeafEnough(cost) {
+        if(leaf < cost) {
+          showTip('叶子不足', `还需要 ${cost - leaf} 片叶子`);
+          return false;
+        }
+        return true;
+      }
+
+      function updateSkillCooldowns() {
+        skills.forEach(skill => {
+          let cdEl = document.getElementById(`skill-cd-${skill.id}`);
+          let btn = document.querySelector(`.skill-btn[data-skill-id="${skill.id}"]`);
+          if (skillCooldowns[skill.id] > 0) {
+            cdEl.textContent = `${skillCooldowns[skill.id]}秒`;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.disabled = true;
+          } else {
+            cdEl.textContent = '';
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.disabled = false;
+          }
+        });
+      }
+
+      function updateMagicCooldowns() {
+        magics.forEach(magic => {
+          let cdEl = document.getElementById(`magic-cd-${magic.id}`);
+          let btn = document.querySelector(`.magic-btn[data-magic-id="${magic.id}"]`);
+          if (magicCooldowns[magic.id] > 0) {
+            cdEl.textContent = `${magicCooldowns[magic.id]}秒`;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.disabled = true;
+          } else {
+            cdEl.textContent = '';
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.disabled = false;
+          }
+        });
+      }
+
+      // 绑定Tab点击事件
+      document.getElementById('tab-ball').onclick = () => switchTab('tab-ball');
+      document.getElementById('tab-skill').onclick = () => switchTab('tab-skill');
+      document.getElementById('tab-magic').onclick = () => switchTab('tab-magic');
+      ['tab-shop','tab-friend'].forEach(id=>{
+        document.getElementById(id).onclick=()=>{
+          if (window.soundManager) soundManager.playButtonClick();
+          document.getElementById('modal-dev').classList.remove('hidden');
+        }
+      });
+
+      // 暂停按钮点击事件
+      document.getElementById('pause-btn').onclick = function() {
+        if (window.soundManager) soundManager.playButtonClick();
+        setPaused(!paused);
+        document.getElementById('pause-mask').classList.toggle('hidden', !paused);
+      };
+
+      // 添加继续游戏按钮点击事件
+      document.getElementById('resume-btn').onclick = function() {
+        if (window.soundManager) soundManager.playButtonClick();
+        setPaused(false);
+        document.getElementById('pause-mask').classList.add('hidden');
+      };
+
+      // 初始化
+      function init() {
+        renderBallList();
+        spawnNPCs();
+        updateLeaf();
+        updateCollectBtn();
+        // 已解锁球球自动加入战场
+        balls.forEach((ball,i)=>{
+          if(i>0 && ball.unlocked) spawnAutoBall(ball);
+        });
+      }
+
+      // 定时器
+      setInterval(()=>{
+        if (cooldown>0) {cooldown--; updateCollectBtn();}
+        
+        let changed = false;
+        Object.keys(magicCooldowns).forEach(id => {
+          if (magicCooldowns[id] > 0) {
+            magicCooldowns[id]--;
+            changed = true; 
+          }
+        });
+        if (changed) updateMagicCooldowns();
+
+        changed = false;
+        Object.keys(skillCooldowns).forEach(id => {
+          if (skillCooldowns[id] > 0) {
+            skillCooldowns[id]--;
+            changed = true;
+          }
+        }); 
+        if (changed) updateSkillCooldowns();
+      }, 1000);
+
+      // 页面加载完成后开始加载数据
+      window.addEventListener('load', loadGameData);
+    </script>
+  </body>
+</html> 

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "super_giant",
+    "name": "超级巨人",
+    "desc": "所有球球变大2倍，持续30秒",
+    "icon": "fa-mountain",
+    "cost": 1000,
+    "duration": 30,
+    "cooldown": 120,
+    "effect": {
+      "sizeMultiplier": 2
+    }
+  },
+  {
+    "id": "pea_shooter",
+    "name": "豌豆射手",
+    "desc": "所有球球发射豌豆，伤害提升3倍，持续20秒",
+    "icon": "fa-seedling",
+    "cost": 2000,
+    "duration": 20,
+    "cooldown": 180,
+    "effect": {
+      "damageMultiplier": 3
+    }
+  },
+  {
+    "id": "shape_shifter",
+    "name": "千变万化",
+    "desc": "所有球球随机变换形态，速度提升2倍，持续15秒",
+    "icon": "fa-wand-magic-sparkles",
+    "cost": 3000,
+    "duration": 15,
+    "cooldown": 240,
+    "effect": {
+      "speedMultiplier": 2
+    }
+  }
+] 

@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "name": "点击",
+    "img": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 10,
+    "unlockCost": 0,
+    "upgradeBase": 100,
+    "upgradeRatio": 1.15,
+    "speed": 0,
+    "desc": "点击屏幕造成伤害"
+  },
+  {
+    "id": 2,
+    "name": "猫咪球",
+    "img": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 15,
+    "unlockCost": 500,
+    "upgradeBase": 200,
+    "upgradeRatio": 1.18,
+    "speed": 3.5,
+    "desc": "自动攻击，速度较快"
+  },
+  {
+    "id": 3,
+    "name": "一叶球",
+    "img": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 20,
+    "unlockCost": 1000,
+    "upgradeBase": 300,
+    "upgradeRatio": 1.20,
+    "speed": 1.5,
+    "desc": "自动攻击，均衡型"
+  },
+  {
+    "id": 4,
+    "name": "太极球",
+    "img": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 25,
+    "unlockCost": 2000,
+    "upgradeBase": 400,
+    "upgradeRatio": 1.22,
+    "speed": 1.8,
+    "desc": "自动攻击，伤害较高"
+  },
+  {
+    "id": 5,
+    "name": "冰霜球",
+    "img": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 30,
+    "unlockCost": 3000,
+    "upgradeBase": 350,
+    "upgradeRatio": 1.19,
+    "speed": 1.2,
+    "desc": "自动攻击，附带减速"
+  },
+  {
+    "id": 6,
+    "name": "剧毒球",
+    "img": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 35,
+    "unlockCost": 4000,
+    "upgradeBase": 500,
+    "upgradeRatio": 1.25,
+    "speed": 1.6,
+    "desc": "自动攻击，附带持续伤害"
+  },
+  {
+    "id": 7,
+    "name": "重水球",
+    "img": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 40,
+    "unlockCost": 6000,
+    "upgradeBase": 600,
+    "upgradeRatio": 1.23,
+    "speed": 0.9,
+    "desc": "自动攻击，击退效果"
+  },
+  {
+    "id": 8,
+    "name": "火焰球",
+    "img": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 50,
+    "unlockCost": 8000,
+    "upgradeBase": 800,
+    "upgradeRatio": 1.28,
+    "speed": 2.6,
+    "desc": "自动攻击，爆发伤害"
+  },
+  {
+    "id": 9,
+    "name": "雷电球",
+    "img": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 80,
+    "unlockCost": 12000,
+    "upgradeBase": 1200,
+    "upgradeRatio": 1.30,
+    "speed": 4.6,
+    "desc": "自动攻击，连锁伤害" 
+  },
+  {
+    "id": 10,
+    "name": "星辰球",
+    "img": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=facearea&w=48&h=48",
+    "baseDamage": 100,
+    "unlockCost": 20000,
+    "upgradeBase": 2000,
+    "upgradeRatio": 1.35,
+    "speed": 6.1,
+    "desc": "自动攻击，范围伤害"
+  }
+] 

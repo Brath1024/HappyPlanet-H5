@@ -1,0 +1,39 @@
+[
+  {
+    "id": "speed_up",
+    "name": "加速",
+    "desc": "所有球球速度提升1.5倍，持续20秒",
+    "icon": "fa-bolt",
+    "cost": 500,
+    "duration": 20,
+    "cooldown": 60,
+    "effect": {
+      "speedMultiplier": 1.5
+    }
+  },
+  {
+    "id": "lightning",
+    "name": "雷电",
+    "desc": "所有球球获得雷电效果，伤害提升2倍，持续15秒",
+    "icon": "fa-bolt-lightning",
+    "cost": 800,
+    "duration": 15,
+    "cooldown": 90,
+    "effect": {
+      "damageMultiplier": 2
+    }
+  },
+  {
+    "id": "blood_boil",
+    "name": "热血沸腾",
+    "desc": "所有球球进入狂暴状态，伤害和速度提升1.3倍，持续25秒",
+    "icon": "fa-fire",
+    "cost": 1200,
+    "duration": 25,
+    "cooldown": 120,
+    "effect": {
+      "damageMultiplier": 1.3,
+      "speedMultiplier": 1.3
+    }
+  }
+] 
